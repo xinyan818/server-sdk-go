@@ -942,10 +942,12 @@ func (rc *RongCloud) ChatRoomMuteMembersRemove(id string, members []string) erro
  * @param	key			聊天室属性名称，Key 支持大小写英文字母、数字、部分特殊符号 + = - _ 的组合方式，大小写敏感。最大长度 128 字符
  * @param	value		聊天室属性对应的值，最大长度 4096 个字符
  * @param	autoDelete	用户退出聊天室后，是否删除此 Key 值。为 true 时删除此 Key 值，为 false 时用户退出后不删除此 Key
+ * @param	objectName	通知消息类型，设置属性后是否发送通知消息，如需要发送则设置为 RC:chrmKVNotiMsg 或其他自定义消息，为空或不传时不向聊天室发送通知消息，默认为不发送。
+ * @param	content		通知消息内容，JSON 结构，当 objectName 为 RC:chrmKVNotiMsg 时，content 必须包含 type、key、value 属性，详细查看 RC:chrmKVNotiMsg 结构说明。
  *
  * @retrun error
  */
-func (rc *RongCloud) ChatRoomEntrySet(chatRoomID, userID, key, value string, autoDelete bool) error {
+func (rc *RongCloud) ChatRoomEntrySet(chatRoomID, userID, key, value string, autoDelete bool, objectName, content string) error {
 	if chatRoomID == "" {
 		return RCErrorNew(1002, "Paramer 'chatRoomID' is required")
 	}
@@ -971,6 +973,12 @@ func (rc *RongCloud) ChatRoomEntrySet(chatRoomID, userID, key, value string, aut
 	req.Param("key", key)
 	req.Param("value", value)
 	req.Param("autoDelete", strconv.FormatBool(autoDelete))
+	if objectName != "" {
+		req.Param("objectName", objectName)
+	}
+	if content != "" {
+		req.Param("content", content)
+	}
 
 	_, err := rc.do(req)
 	if err != nil {
@@ -985,10 +993,12 @@ func (rc *RongCloud) ChatRoomEntrySet(chatRoomID, userID, key, value string, aut
  * @param	chatRoomID	聊天室 Id
  * @param	userID		操作用户 Id。通过 Server API 非聊天室中用户可以进行设置。
  * @param	key			聊天室属性名称，Key 支持大小写英文字母、数字、部分特殊符号 + = - _ 的组合方式，大小写敏感。最大长度 128 字
+ * @param	objectName	通知消息类型，设置属性后是否发送通知消息，如需要发送则设置为 RC:chrmKVNotiMsg 或其他自定义消息，为空或不传时不向聊天室发送通知消息，默认为不发送。（可选）
+ * @param	content		通知消息内容，JSON 结构，当 objectName 为 RC:chrmKVNotiMsg 时，content 必须包含 type、key、value 属性，详细查看 RC:chrmKVNotiMsg 结构说明。
  *
  * @return error
  */
-func (rc *RongCloud) ChatRoomEntryRemove(chatRoomID, userID, key string) error {
+func (rc *RongCloud) ChatRoomEntryRemove(chatRoomID, userID, key, objectName, content string) error {
 	if chatRoomID == "" {
 		return RCErrorNew(1002, "Paramer 'chatRoomID' is required")
 	}
@@ -1008,6 +1018,12 @@ func (rc *RongCloud) ChatRoomEntryRemove(chatRoomID, userID, key string) error {
 	req.Param("chatroomId", chatRoomID)
 	req.Param("userId", userID)
 	req.Param("key", key)
+	if objectName != "" {
+		req.Param("objectName", objectName)
+	}
+	if content != "" {
+		req.Param("content", content)
+	}
 
 	_, err := rc.do(req)
 	if err != nil {
