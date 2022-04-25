@@ -153,3 +153,39 @@ func (rc *RongCloud) ConversationGet(conversationType ConversationType, userID, 
 	}
 	return isMuted, nil
 }
+
+// ConversationMute 设置会话置顶
+/*
+*@param  conversationType:会话类型 PRIVATE、GROUP、DISCUSSION、SYSTEM。
+*@param  userID:设置用户 ID。
+*@param  targetID:需要置顶的目标 ID。
+*
+*@return error
+ */
+func (rc *RongCloud) ConversationTop(conversationType ConversationType, userID, targetID string) error {
+	if conversationType == 0 {
+		return RCErrorNew(1002, "Param 'conversationType' is required")
+	}
+
+	if userID == "" {
+		return RCErrorNew(1002, "Param 'userID' is required")
+	}
+
+	if targetID == "" {
+		return RCErrorNew(1002, "Param 'targetID' is required")
+	}
+
+	req := httplib.Post(rc.rongCloudURI + "/conversation/top/set." + ReqType)
+	req.SetTimeout(time.Second*rc.timeout, time.Second*rc.timeout)
+	rc.fillHeader(req)
+	req.Param("userId", userID)
+	req.Param("conversationType", fmt.Sprintf("%v", conversationType))
+	req.Param("targetId", targetID)
+	req.Param("setTop", "true")
+
+	_, err := rc.do(req)
+	if err != nil {
+		rc.urlError(err)
+	}
+	return err
+}
